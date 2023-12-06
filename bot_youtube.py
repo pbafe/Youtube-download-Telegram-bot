@@ -101,7 +101,7 @@ def download_video_audio(url, selected_format, output_path, file_name,file_exten
         ydl_opts['postprocessors'] = [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
-            'preferredquality': '192',
+            'preferredquality': '320',
         }]
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
