@@ -82,28 +82,31 @@ def clean_filename(s: str) -> str:
 
 
 def is_valid_youtube_link(link):
-    if (message.text.startswith('https://www.youtube.com/') and len(message.text) > len('https://www.youtube.com/')) 
-        or (message.text.startswith('https://youtu.be/') and len(message.text) > len('https://youtu.be/'))
-        or (message.text.startswith('https://m.youtube.com/') and len(message.text) > len('https://m.youtube.com/')):
+    # Pre-checks before asking ydl library to check if the link is valid
+    if (link.startswith('https://www.youtube.com/') and len(link) > len('https://www.youtube.com/')) \
+        or (link.startswith('https://youtu.be/') and len(link) > len('https://youtu.be/')) \
+        or (link.startswith('https://m.youtube.com/') and len(link) > len('https://m.youtube.com/')):
+
         try:
             ydl_opts = {'quiet': True}
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info_dict = ydl.extract_info(link, download=False)
-    
+
                 # Check if the video is part of a playlist
                 if 'entries' in info_dict:
                     return False
-    
+
                 # Check if the video has multiple parts (e.g., is not a direct video link)
                 if 'parts' in info_dict:
                     return False
-    
+
                 # If none of the above conditions are met, consider it a valid direct video link
                 return True
         except yt_dlp.utils.DownloadError:
             return False
-        else:
-            return False
+    else:
+        return False
+
 def download_video_audio(url, selected_format, output_path, file_name,file_extension):
     file_name = clean_filename(file_name)
     selected_format_id = selected_format['format_id']
