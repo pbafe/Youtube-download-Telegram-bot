@@ -3,3 +3,4 @@ telebot
 yt-dlp
 mega.py
 configparser
+tenacity
