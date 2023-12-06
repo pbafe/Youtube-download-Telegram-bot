@@ -6,7 +6,7 @@ Telegram bot for Youtube download
 git clone ... 
 
 #### update credentials
-update scripts/config.ini
+```update scripts/config.ini``` 
 
 #### create docker image
 docker build -t yt_dl .
