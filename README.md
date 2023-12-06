@@ -2,16 +2,16 @@
 Telegram bot for Youtube download
 
 ## If you use Docker, [recommended]:
-# clone the repository
+#### clone the repository
 git clone ... 
 
-# update credentials
+#### update credentials
 update scripts/config.ini
 
-# create docker image
+#### create docker image
 docker build -t yt_dl .
 
-# run container
+#### run container
 sudo docker run --name yt_dl_container --restart always -d yt_dl
 
 
