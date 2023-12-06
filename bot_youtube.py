@@ -19,16 +19,28 @@ bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 def get_available_formats(video_info):
     formats_list = []
 
-    index = 2  # Start index at 1
-    # Mp3 music
+    
+    # Mp3 low q music
     formats_dict = {"index": 1,
-                    "resolution": "Default",
+                    "resolution": "Low-quality",
                     "format_note": "music",
                     "ext": "mp3",
                     "format_id": "000",
+                    "preferredaudioquality": "128"
                     }
     formats_list.append(formats_dict)
 
+    # Mp3 high q music
+    formats_dict = {"index": 2,
+                    "resolution": "High-quality",
+                    "format_note": "music",
+                    "ext": "mp3",
+                    "format_id": "001",
+                    "preferredaudioquality": "320"
+                    }
+    formats_list.append(formats_dict)
+
+    index = 3  # Start index at 1
     # Other formats
     for vformat in video_info['formats']:
         f_size_bytes = vformat.get('filesize', 'N/A')
@@ -89,8 +101,12 @@ def is_valid_youtube_link(link):
         return False
 def download_video_audio(url, selected_format, output_path, file_name,file_extension):
     file_name = clean_filename(file_name)
-    # AUDIO
-    if selected_format == "000":
+    selected_format_id = selected_format['format_id']
+    
+
+    if selected_format_id == '000' or selected_format_id == '001':
+        selected_quality = selected_format['preferredaudioquality']
+
         output_file = os.path.join(output_path, clean_filename(
             f'{file_name}'))  # for some reason this adds the extension to the name
         # Audio download
@@ -101,7 +117,7 @@ def download_video_audio(url, selected_format, output_path, file_name,file_exten
         ydl_opts['postprocessors'] = [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
-            'preferredquality': '320',
+            'preferredquality': selected_quality,
         }]
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
@@ -111,9 +127,10 @@ def download_video_audio(url, selected_format, output_path, file_name,file_exten
             print ("Exception: ", e)
         output_file = output_file + '.mp3'  # put the right file extension
         print("output_file_updated", output_file)
+    
     else:
         output_file = os.path.join(output_path, clean_filename(f'{file_name}.{file_extension}'))
-        with yt_dlp.YoutubeDL({'format': selected_format, 'outtmpl': output_file}) as ydl:
+        with yt_dlp.YoutubeDL({'format': selected_format_id, 'outtmpl': output_file}) as ydl:
             ydl.download([url])
 
     return output_file
@@ -184,12 +201,13 @@ def handle_user_response(message):
                     user_states[chat_id]['state'] = "SENDING_VIDEO"
 
                     selected_format_id = user_states[chat_id]['formats'][selected_index]['format_id']
+                    selected_format = user_states[chat_id]['formats'][selected_index]
                     file_name = user_states[chat_id]['video_info']['title']
                     file_extension=user_states[chat_id]['formats'][selected_index]['ext']
                     url = user_states[chat_id]['url']
 
                     bot.send_message(chat_id, "Processing request")
-                    downloaded_file=download_video_audio(url, selected_format_id, downloads_folder, file_name, file_extension)
+                    downloaded_file=download_video_audio(url, selected_format, downloads_folder, file_name, file_extension)
 
                     file_size = os.path.getsize(downloaded_file) # Telegram file-size limits
                     if file_size < 50000000:
