@@ -82,23 +82,28 @@ def clean_filename(s: str) -> str:
 
 
 def is_valid_youtube_link(link):
-    try:
-        ydl_opts = {'quiet': True}
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=False)
-
-            # Check if the video is part of a playlist
-            if 'entries' in info_dict:
-                return False
-
-            # Check if the video has multiple parts (e.g., is not a direct video link)
-            if 'parts' in info_dict:
-                return False
-
-            # If none of the above conditions are met, consider it a valid direct video link
-            return True
-    except yt_dlp.utils.DownloadError:
-        return False
+    if (message.text.startswith('https://www.youtube.com/') and len(message.text) > len('https://www.youtube.com/')) 
+        or (message.text.startswith('https://youtu.be/') and len(message.text) > len('https://youtu.be/'))
+        or (message.text.startswith('https://m.youtube.com/') and len(message.text) > len('https://m.youtube.com/')):
+        try:
+            ydl_opts = {'quiet': True}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info_dict = ydl.extract_info(link, download=False)
+    
+                # Check if the video is part of a playlist
+                if 'entries' in info_dict:
+                    return False
+    
+                # Check if the video has multiple parts (e.g., is not a direct video link)
+                if 'parts' in info_dict:
+                    return False
+    
+                # If none of the above conditions are met, consider it a valid direct video link
+                return True
+        except yt_dlp.utils.DownloadError:
+            return False
+        else:
+            return False
 def download_video_audio(url, selected_format, output_path, file_name,file_extension):
     file_name = clean_filename(file_name)
     selected_format_id = selected_format['format_id']
@@ -158,10 +163,7 @@ def handle_messages(message):
         handle_initial_message(message)
 
 def handle_initial_message(message):
-    if '\n' not in message.text \
-            and (message.text.startswith('https://www.youtube.com/')
-            or message.text.startswith('https://youtu.be/')
-            or message.text.startswith('https://m.youtube.com/')):
+    if '\n' not in message.text:
         chat_id = message.chat.id
         user_states[chat_id] = {'state': "CHECKING_LINK"}
         if is_valid_youtube_link(message.text):
