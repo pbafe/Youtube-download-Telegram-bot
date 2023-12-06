@@ -151,7 +151,7 @@ def handle_initial_message(message):
             formats, video_info = yt_dl_init(message.text)
             message_formats=[] # variable to nicely print the formats in the chat
             for dic in formats:
-                line = str(dic[list(dic.keys())[0]]) + ". " + "-".join([str(dic[k]) for k in list(dic.keys())[1:5]])
+                line = str(dic[list(dic.keys())[0]]) + ". " + "-".join([str(dic[k]) for k in list(dic.keys())[1:4]])
                 message_formats.append(line)
             bot.send_message(message.chat.id, '\n'.join(message_formats))
 
